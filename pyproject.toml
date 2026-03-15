@@ -25,6 +25,7 @@ dependencies = [
     "langchain >=0.3.7,<1",
     "langchain-community >=0.3.7,<1",
     "rago >=0.14.4",
+    "openpyxl >=3.1.2",
     # NumPy: macOS stays on 1.x; others use 2.x (with your Python guards)
     "numpy >=1.26,<2 ; python_version <  '3.13' and sys_platform == 'darwin'",
     "numpy >=2       ; python_version >= '3.13' and sys_platform == 'darwin'",
