@@ -23,18 +23,31 @@ FileInput = Union[str, Path, io.BytesIO, bytes]
 
 
 class MedicalVisionExtractorError(Exception):
-    """Base exception for MedVision Extraction."""
+    """
+    title: Base exception for MedVision Extraction.
+    """
 
     pass
 
 
 class MedicalVisionExtractor:
     """
-    Extracts structured clinical visual observations from images.
-    Combines preprocessing (validation, blur check, resize) with Vision LLMs.
+    title: Extracts structured clinical visual observations from images.
+    attributes:
+      processor:
+        description: Handles image validation and standardization.
+      pipeline:
+        description: Executes the core visual analysis using LLM settings.
     """
 
     def __init__(self, llm_settings: Optional[LLMSettings] = None) -> None:
+        """
+        title: Initialize the MedicalVisionExtractor.
+        parameters:
+          llm_settings:
+            type: Optional[LLMSettings]
+            description: Optional LLMSettings overriding defaults.
+        """
         self.processor = ImageProcessor()
         self.pipeline = MedVisionPipeline(settings=llm_settings)
 
@@ -42,7 +55,17 @@ class MedicalVisionExtractor:
         self, source: FileInput, clinical_context: Optional[str] = None
     ) -> dict[str, Any]:
         """
-        Validate, standardize, and analyze the image source.
+        title: Validate, standardize, and analyze the image source.
+        parameters:
+          source:
+            type: FileInput
+            description: File path, BytesIO, or raw bytes containing the image.
+          clinical_context:
+            type: Optional[str]
+            description: Optional text context to guide the LLM.
+        returns:
+          type: dict[str, Any]
+          description: Dictionary containing the structured findings.
         """
         try:
             if isinstance(source, bytes):
@@ -78,5 +101,10 @@ class MedicalVisionExtractor:
 
 
 def get_medical_vision_extractor() -> MedicalVisionExtractor:
-    """Create and return an instance of MedicalVisionExtractor."""
+    """
+    title: Create and return an instance of MedicalVisionExtractor.
+    returns:
+      type: MedicalVisionExtractor
+      description: An instance of MedicalVisionExtractor.
+    """
     return MedicalVisionExtractor()

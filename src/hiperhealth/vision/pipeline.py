@@ -10,7 +10,16 @@ from hiperhealth.llm import LLMSettings, build_structured_llm
 
 
 class VisionFinding(BaseModel):
-    """Structured output from the Vision LLM."""
+    """
+    title: Structured output from the Vision LLM.
+    attributes:
+      region_tag:
+        type: str
+      clinical_finding:
+        type: str
+      confidence_score:
+        type: float
+    """
 
     region_tag: str
     clinical_finding: str
@@ -18,24 +27,53 @@ class VisionFinding(BaseModel):
 
 
 class VisionExtractionResult(BaseModel):
-    """Collection of findings from a single image."""
+    """
+    title: Collection of findings from a single image.
+    attributes:
+      findings:
+        type: list[VisionFinding]
+      image_quality_notes:
+        type: str
+    """
 
     findings: list[VisionFinding]
     image_quality_notes: str
 
 
 class MedVisionPipeline:
-    """Handles communication with Vision models."""
+    """
+    title: Handles communication with Vision models.
+    attributes:
+      settings:
+        description: LLM Settings
+      llm:
+        description: LLM instance
+    """
 
     def __init__(self, settings: LLMSettings | None = None) -> None:
-        """Initialize with LLMSettings (default OpenAI gpt-4o-mini)."""
+        """
+        title: Initialize with LLMSettings.
+        parameters:
+          settings:
+            type: LLMSettings | None
+            description: Optional LLMSettings overriding defaults.
+        """
         self.settings = settings or LLMSettings(
             provider='openai', model='gpt-4o-mini'
         )
         self.llm = build_structured_llm(settings=self.settings)
 
     def _image_to_base64(self, img: Image.Image) -> str:
-        """Convert PIL Image to base64 string."""
+        """
+        title: Convert PIL Image to base64 string.
+        parameters:
+          img:
+            type: Image.Image
+            description: The PIL Image to convert.
+        returns:
+          type: str
+          description: Base64 formatted string with data URI.
+        """
         buffered = io.BytesIO()
         img.save(buffered, format='JPEG')
         img_str = base64.b64encode(buffered.getvalue()).decode('utf-8')
@@ -45,10 +83,18 @@ class MedVisionPipeline:
         self, processed_image: Image.Image, clinical_context: str | None = None
     ) -> VisionExtractionResult:
         """
-        Send standardized image to the vision model and extract
-        structured findings.
-
-        Parameters"""
+        title: Analyze standardized image, extract findings.
+        parameters:
+          processed_image:
+            type: Image.Image
+            description: Standardized clinical image input.
+          clinical_context:
+            type: str | None
+            description: Optional context provided by the end user.
+        returns:
+          type: VisionExtractionResult
+          description: The collection of findings returned by the model.
+        """
 
         base64_img = self._image_to_base64(processed_image)
         schema_json = VisionExtractionResult.model_json_schema()

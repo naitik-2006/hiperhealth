@@ -1,6 +1,5 @@
 """
-Image preprocessing utilities for MedVision pipeline.
-Includes blur detection, exposure checks, and standardization.
+title: Image preprocessing utilities for MedVision pipeline.
 """
 
 from __future__ import annotations
@@ -16,13 +15,21 @@ from PIL import Image, ImageStat
 
 
 class ImageValidationError(ValueError):
-    """Raised when an image fails validation checks."""
+    """
+    title: Raised when an image fails validation checks.
+    """
 
     pass
 
 
 class ImageProcessor:
-    """Validates and standardizes medical images for the MedVision pipeline."""
+    """
+    title: >-
+      Validates and standardizes medical images for the MedVision pipeline.
+    attributes:
+      ALLOWED_MIME_TYPES:
+        type: ClassVar[set[str]]
+    """
 
     # Constants for validation thresholds
     MIN_VAR_LAPLACIAN = 100.0  # Threshold for blur detection
@@ -33,7 +40,16 @@ class ImageProcessor:
 
     @staticmethod
     def _get_mime_type(file_bytes: bytes) -> str:
-        """Get the MIME type of a byte buffer using Pillow."""
+        """
+        title: Get the MIME type of a byte buffer using Pillow.
+        parameters:
+          file_bytes:
+            type: bytes
+            description: The file to identify.
+        returns:
+          type: str
+          description: The best guessed MIME type string.
+        """
         try:
             with Image.open(io.BytesIO(file_bytes)) as img:
                 fmt = img.format
@@ -49,23 +65,16 @@ class ImageProcessor:
 
     def validate_integrity(self, file_bytes: bytes) -> bool:
         """
-        Check if the file is an image, is not corrupted, is not too blurry,
-        and has acceptable exposure.
-
-        Parameters
-        ----------
-        file_bytes : bytes
-            The raw bytes of the image file.
-
-        Returns
-        -------
-        bool
-            True if valid.
-
-        Raises
-        ------
-        ImageValidationError
-            If the image fails any check.
+        title: >-
+          Check if the file is an image, is not corrupted, is not too blurry,
+          and has acceptable exposure.
+        parameters:
+          file_bytes:
+            type: bytes
+            description: The raw bytes of the image file.
+        returns:
+          type: bool
+          description: True if valid.
         """
         # 1. Security/MIME Check
         mime_type = self._get_mime_type(file_bytes)
@@ -88,18 +97,8 @@ class ImageProcessor:
                 np.array(img.convert('RGB')), cv2.COLOR_RGB2BGR
             )
 
-            # 3. Blur Detection: Variance of Laplacian
-            gray = cv2.cvtColor(cv_img, cv2.COLOR_BGR2GRAY)
-            variance_of_laplacian = cv2.Laplacian(gray, cv2.CV_64F).var()
 
-            if variance_of_laplacian < self.MIN_VAR_LAPLACIAN:
-                raise ImageValidationError(
-                    'Image is too blurry for clinical use. '
-                    f'Score: {variance_of_laplacian:.2f} '
-                    f'< {self.MIN_VAR_LAPLACIAN}'
-                )
-
-            # 4. Exposure Check
+            # 3. Exposure Check
             # Convert to grayscale to check brightness
             stat = ImageStat.Stat(img.convert('L'))
             avg_brightness = stat.mean[0] / 255.0
@@ -109,6 +108,17 @@ class ImageProcessor:
             elif avg_brightness > self.EXPOSURE_THRESHOLD_HIGH:
                 raise ImageValidationError(
                     'Image is too bright (overexposed).'
+                )
+            
+            # 4. Blur Detection: Variance of Laplacian
+            gray = cv2.cvtColor(cv_img, cv2.COLOR_BGR2GRAY)
+            variance_of_laplacian = cv2.Laplacian(gray, cv2.CV_64F).var()
+
+            if variance_of_laplacian < self.MIN_VAR_LAPLACIAN:
+                raise ImageValidationError(
+                    'Image is too blurry for clinical use. '
+                    f'Score: {variance_of_laplacian:.2f} '
+                    f'< {self.MIN_VAR_LAPLACIAN}'
                 )
 
         except Exception as e:
@@ -122,18 +132,14 @@ class ImageProcessor:
 
     def standardize(self, file_bytes: bytes) -> Image.Image:
         """
-        Standardizes the image for clinical ML model inference.
-        Ensures RGB format and a 224x224 aspect-preserving letterbox crop.
-
-        Parameters
-        ----------
-        file_bytes : bytes
-            The raw bytes of the image file.
-
-        Returns
-        -------
-        Image.Image
-            The standardized PIL Image.
+        title: Standardizes the image for clinical ML model inference.
+        parameters:
+          file_bytes:
+            type: bytes
+            description: The raw bytes of the image file.
+        returns:
+          type: Image.Image
+          description: The standardized PIL Image.
         """
         img: Image.Image = Image.open(io.BytesIO(file_bytes))
 

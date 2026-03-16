@@ -18,12 +18,25 @@ from PIL import Image, ImageDraw
 
 @pytest.fixture
 def mock_image():
+    """
+    title: Mock Image
+    """
     return Image.new('RGB', (224, 224), color='red')
 
 
 @patch.dict('os.environ', {'OPENAI_API_KEY': 'fake-key'})
 @patch('litellm.completion')
 def test_pipeline_extraction(mock_completion, mock_image):
+    """
+    title: Test Pipeline Extraction
+    parameters:
+      mock_completion:
+        type: MagicMock
+        description: Mock for litellm.completion.
+      mock_image:
+        type: Image.Image
+        description: Mock image for testing.
+    """
     mock_response = MagicMock()
     mock_choice = MagicMock()
     mock_choice.message.content = (
@@ -53,6 +66,13 @@ def test_pipeline_extraction(mock_completion, mock_image):
 
 @patch('hiperhealth.agents.extraction.vision.MedVisionPipeline.analyze_image')
 def test_medical_vision_extractor_flow(mock_analyze_image):
+    """
+    title: Test Medical Vision Extractor Flow
+    parameters:
+      mock_analyze_image:
+        type: MagicMock
+        description: Mock for analyze_image.
+    """
     # Create valid image bytes
     img = Image.new('RGB', (300, 300), color=(128, 128, 128))
     draw = ImageDraw.Draw(img)
@@ -82,6 +102,16 @@ def test_medical_vision_extractor_flow(mock_analyze_image):
 
 @patch('hiperhealth.agents.extraction.vision.MedVisionPipeline.analyze_image')
 def test_medical_vision_extractor_input_types(mock_analyze_image, tmp_path):
+    """
+    title: Test Medical Vision Extractor Input Types
+    parameters:
+      mock_analyze_image:
+        type: MagicMock
+        description: Mock for analyze_image.
+      tmp_path:
+        type: Path
+        description: Temporary path for testing.
+    """
     mock_analyze_image.return_value = VisionExtractionResult(
         findings=[
             VisionFinding(
@@ -126,6 +156,13 @@ def test_medical_vision_extractor_input_types(mock_analyze_image, tmp_path):
 
 @patch('hiperhealth.agents.extraction.vision.MedVisionPipeline.analyze_image')
 def test_medical_vision_extractor_pipeline_error(mock_analyze_image):
+    """
+    title: Test Medical Vision Extractor Pipeline Error
+    parameters:
+      mock_analyze_image:
+        type: MagicMock
+        description: Mock for analyze_image.
+    """
     mock_analyze_image.side_effect = Exception('API down')
 
     img = Image.new('RGB', (300, 300), color=(128, 128, 128))
