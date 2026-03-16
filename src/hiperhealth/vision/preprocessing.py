@@ -7,6 +7,8 @@ from __future__ import annotations
 
 import io
 
+from typing import ClassVar
+
 import cv2
 import numpy as np
 
@@ -27,7 +29,7 @@ class ImageProcessor:
     EXPOSURE_THRESHOLD_LOW = 0.05  # Reject if >95% pure black
     EXPOSURE_THRESHOLD_HIGH = 0.95  # Reject if >95% pure white
     TARGET_SIZE = (224, 224)
-    ALLOWED_MIME_TYPES = {'image/jpeg', 'image/png'}
+    ALLOWED_MIME_TYPES: ClassVar[set[str]] = {'image/jpeg', 'image/png'}
 
     @staticmethod
     def _get_mime_type(file_bytes: bytes) -> str:
@@ -69,7 +71,8 @@ class ImageProcessor:
         mime_type = self._get_mime_type(file_bytes)
         if mime_type not in self.ALLOWED_MIME_TYPES:
             raise ImageValidationError(
-                f'Invalid MIME type: {mime_type}. Allowed: {self.ALLOWED_MIME_TYPES}'
+                f'Invalid MIME type: {mime_type}. '
+                f'Allowed: {self.ALLOWED_MIME_TYPES}'
             )
 
         try:
@@ -91,7 +94,9 @@ class ImageProcessor:
 
             if variance_of_laplacian < self.MIN_VAR_LAPLACIAN:
                 raise ImageValidationError(
-                    f'Image is too blurry for clinical use. Score: {variance_of_laplacian:.2f} < {self.MIN_VAR_LAPLACIAN}'
+                    'Image is too blurry for clinical use. '
+                    f'Score: {variance_of_laplacian:.2f} '
+                    f'< {self.MIN_VAR_LAPLACIAN}'
                 )
 
             # 4. Exposure Check
@@ -109,7 +114,7 @@ class ImageProcessor:
         except Exception as e:
             if not isinstance(e, ImageValidationError):
                 raise ImageValidationError(
-                    f'Corrupted or invalid image file: {str(e)}'
+                    f'Corrupted or invalid image file: {e!s}'
                 )
             raise e
 
@@ -130,7 +135,7 @@ class ImageProcessor:
         Image.Image
             The standardized PIL Image.
         """
-        img = Image.open(io.BytesIO(file_bytes))
+        img: Image.Image = Image.open(io.BytesIO(file_bytes))
 
         # 1. Color Space Conversion
         if img.mode in ('RGBA', 'LA') or (
