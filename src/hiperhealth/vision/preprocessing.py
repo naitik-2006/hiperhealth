@@ -97,7 +97,6 @@ class ImageProcessor:
                 np.array(img.convert('RGB')), cv2.COLOR_RGB2BGR
             )
 
-
             # 3. Exposure Check
             # Convert to grayscale to check brightness
             stat = ImageStat.Stat(img.convert('L'))
@@ -109,7 +108,7 @@ class ImageProcessor:
                 raise ImageValidationError(
                     'Image is too bright (overexposed).'
                 )
-            
+
             # 4. Blur Detection: Variance of Laplacian
             gray = cv2.cvtColor(cv_img, cv2.COLOR_BGR2GRAY)
             variance_of_laplacian = cv2.Laplacian(gray, cv2.CV_64F).var()

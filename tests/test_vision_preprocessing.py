@@ -125,7 +125,8 @@ def underexposed_image_bytes():
     title: Underexposed Image Bytes
     """
     # Use 100x100 black image with 4 sharp white lines
-    # This gives high Laplacian variance (sharpness), but very low average brightness (4%)
+    # This gives high Laplacian variance (sharpness)
+    # But very low average brightness (4%)
     img = Image.new('RGB', (100, 100), color=(0, 0, 0))
     draw = ImageDraw.Draw(img)
     for i in range(10, 50, 10):
@@ -141,7 +142,8 @@ def overexposed_image_bytes():
     title: Overexposed Image Bytes
     """
     # Use 100x100 white image with 4 sharp black lines
-    # This gives high Laplacian variance, but very high average brightness (96%)
+    # This gives high Laplacian variance
+    # But very high average brightness (96%)
     img = Image.new('RGB', (100, 100), color=(255, 255, 255))
     draw = ImageDraw.Draw(img)
     for i in range(10, 50, 10):

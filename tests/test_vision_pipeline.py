@@ -31,10 +31,8 @@ def test_pipeline_extraction(mock_completion, mock_image):
     title: Test Pipeline Extraction
     parameters:
       mock_completion:
-        type: MagicMock
         description: Mock for litellm.completion.
       mock_image:
-        type: Image.Image
         description: Mock image for testing.
     """
     mock_response = MagicMock()
@@ -70,7 +68,6 @@ def test_medical_vision_extractor_flow(mock_analyze_image):
     title: Test Medical Vision Extractor Flow
     parameters:
       mock_analyze_image:
-        type: MagicMock
         description: Mock for analyze_image.
     """
     # Create valid image bytes
@@ -106,10 +103,8 @@ def test_medical_vision_extractor_input_types(mock_analyze_image, tmp_path):
     title: Test Medical Vision Extractor Input Types
     parameters:
       mock_analyze_image:
-        type: MagicMock
         description: Mock for analyze_image.
       tmp_path:
-        type: Path
         description: Temporary path for testing.
     """
     mock_analyze_image.return_value = VisionExtractionResult(
@@ -160,7 +155,6 @@ def test_medical_vision_extractor_pipeline_error(mock_analyze_image):
     title: Test Medical Vision Extractor Pipeline Error
     parameters:
       mock_analyze_image:
-        type: MagicMock
         description: Mock for analyze_image.
     """
     mock_analyze_image.side_effect = Exception('API down')
