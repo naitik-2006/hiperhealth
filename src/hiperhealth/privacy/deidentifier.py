@@ -1,8 +1,10 @@
-"""A module for PII detection and de-identification."""
+"""
+title: A module for PII detection and de-identification.
+"""
 
 import logging
 
-from typing import Dict, List, Optional
+from typing import Optional
 
 from presidio_analyzer import (
     AnalyzerEngine,
@@ -17,10 +19,19 @@ logger = logging.getLogger(__name__)
 
 
 class Deidentifier:
-    """A class for PII detection and de-identification using Presidio."""
+    """
+    title: A class for PII detection and de-identification using Presidio.
+    attributes:
+      analyzer:
+        description: Value for analyzer.
+      anonymizer:
+        description: Value for anonymizer.
+    """
 
     def __init__(self) -> None:
-        """Initialize the Presidio Analyzer and Anonymizer engines."""
+        """
+        title: Initialize the Presidio Analyzer and Anonymizer engines.
+        """
         self.analyzer = AnalyzerEngine()
         self.anonymizer = AnonymizerEngine()  # type: ignore[no-untyped-call]
 
@@ -31,16 +42,30 @@ class Deidentifier:
         score: float = 0.85,
         language: str = 'en',
     ) -> None:
-        """Add a custom PII entity recognizer using a regular expression.
+        """
+        title: Add a custom PII entity recognizer using a regular expression.
+        summary: |-
+          If a recognizer for the same entity_name already exists, this method
+                  replaces the old one to prevent duplicate definitions.
 
-        If a recognizer for the same entity_name already exists, this method
-        replaces the old one to prevent duplicate definitions.
-
-        Args:
-            entity_name: The name for the new entity (e.g., "CUSTOM_ID").
-            regex_pattern: The regex pattern to detect the entity.
-            score: The confidence score for the detection (0.0 to 1.0).
-            language: The language for the recognizer registry.
+                  Args:
+          entity_name: The name for the new entity (e.g., "CUSTOM_ID").
+                      regex_pattern: The regex pattern to detect the entity.
+          score: The confidence score for the detection (0.0 to 1.0).
+                      language: The language for the recognizer registry.
+        parameters:
+          entity_name:
+            type: str
+            description: Value for entity_name.
+          regex_pattern:
+            type: str
+            description: Value for regex_pattern.
+          score:
+            type: float
+            description: Value for score.
+          language:
+            type: str
+            description: Value for language.
         """
         if not (0.0 <= score <= 1.0):
             raise ValueError('Score must be between 0.0 and 1.0.')
@@ -79,10 +104,25 @@ class Deidentifier:
     def analyze(
         self,
         text: str,
-        entities: Optional[List[str]] = None,
+        entities: Optional[list[str]] = None,
         language: str = 'en',
-    ) -> List[RecognizerResult]:
-        """Analyze text to detect and locate PII entities."""
+    ) -> list[RecognizerResult]:
+        """
+        title: Analyze text to detect and locate PII entities.
+        parameters:
+          text:
+            type: str
+            description: Value for text.
+          entities:
+            type: Optional[list[str]]
+            description: Value for entities.
+          language:
+            type: str
+            description: Value for language.
+        returns:
+          type: list[RecognizerResult]
+          description: Return value.
+        """
         return self.analyzer.analyze(
             text=text, entities=entities, language=language
         )
@@ -90,7 +130,22 @@ class Deidentifier:
     def deidentify(
         self, text: str, strategy: str = 'mask', language: str = 'en'
     ) -> str:
-        """Anonymize detected PII in the text using a specified strategy."""
+        """
+        title: Anonymize detected PII in the text using a specified strategy.
+        parameters:
+          text:
+            type: str
+            description: Value for text.
+          strategy:
+            type: str
+            description: Value for strategy.
+          language:
+            type: str
+            description: Value for language.
+        returns:
+          type: str
+          description: Return value.
+        """
         # First, ensure the provided strategy is supported.
         supported_strategies = ['mask', 'hash']
         if strategy not in supported_strategies:
@@ -134,17 +189,8 @@ class Deidentifier:
         return anonymized_result.text
 
 
-def deidentify_patient_record(
-    record: Dict[str, object], deidentifier: Deidentifier
-) -> Dict[str, object]:
-    """Recursively find and de-identify string values in a patient record.
-
-    Args:
-        record: The patient data dictionary.
-        deidentifier: An instance of the Deidentifier class.
-    """
-    # Define which keys contain free-text that needs to be scanned
-    keys_to_deidentify = {
+_DEFAULT_KEYS_TO_DEIDENTIFY = frozenset(
+    {
         'symptoms',
         'physical_activity',
         'mental_exercises',
@@ -153,13 +199,44 @@ def deidentify_patient_record(
         'summary',
         'comments',
     }
+)
+
+
+def deidentify_patient_record(
+    record: dict[str, object],
+    deidentifier: Deidentifier,
+    keys_to_deidentify: frozenset[str] | None = None,
+) -> dict[str, object]:
+    """
+    title: Recursively find and de-identify string values in a patient record.
+    summary: |-
+      Args:
+              record: The patient data dictionary.
+              deidentifier: An instance of the Deidentifier class.
+    parameters:
+      record:
+        type: dict[str, object]
+        description: Value for record.
+      deidentifier:
+        type: Deidentifier
+        description: Value for deidentifier.
+      keys_to_deidentify:
+        type: frozenset[str] | None
+        description: Value for keys_to_deidentify.
+    returns:
+      type: dict[str, object]
+      description: Return value.
+    """
+    effective_keys = (
+        keys_to_deidentify
+        if keys_to_deidentify is not None
+        else _DEFAULT_KEYS_TO_DEIDENTIFY
+    )
 
     for key, value in record.items():
         if isinstance(value, dict):
-            # If the value is a dictionary, recurse into it
-            deidentify_patient_record(value, deidentifier)
-        elif isinstance(value, str) and key in keys_to_deidentify:
-            # If it's a string and its key is in our target list, de-identify
+            deidentify_patient_record(value, deidentifier, effective_keys)
+        elif isinstance(value, str) and key in effective_keys:
             record[key] = deidentifier.deidentify(value)
 
     return record

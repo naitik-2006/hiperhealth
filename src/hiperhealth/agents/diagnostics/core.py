@@ -1,12 +1,15 @@
-"""Diagnostic-related LLM utilities."""
+"""
+title: Diagnostic-related LLM utilities.
+"""
 
 from __future__ import annotations
 
 import json
 
-from typing import Any, Dict, List
+from typing import Any
 
 from hiperhealth.agents.client import chat
+from hiperhealth.llm import LLMSettings, StructuredLLM
 from hiperhealth.schema.clinical_outputs import LLMDiagnosis
 
 _DIAG_PROMPTS = {
@@ -74,28 +77,86 @@ _EXAM_PROMPTS = {
 
 
 def differential(
-    patient: Dict[str, Any],
+    patient: dict[str, Any],
     language: str = 'en',
     session_id: str | None = None,
+    llm: StructuredLLM | None = None,
+    llm_settings: LLMSettings | None = None,
 ) -> LLMDiagnosis:
-    """Return summary + list of differential diagnoses."""
+    """
+    title: Return summary + list of differential diagnoses.
+    parameters:
+      patient:
+        type: dict[str, Any]
+        description: Value for patient.
+      language:
+        type: str
+        description: Value for language.
+      session_id:
+        type: str | None
+        description: Value for session_id.
+      llm:
+        type: StructuredLLM | None
+        description: Value for llm.
+      llm_settings:
+        type: LLMSettings | None
+        description: Value for llm_settings.
+    returns:
+      type: LLMDiagnosis
+      description: Return value.
+    """
     prompt = _DIAG_PROMPTS.get(language, _DIAG_PROMPTS['en'])
+    chat_kwargs: dict[str, Any] = {'session_id': session_id}
+    if llm is not None:
+        chat_kwargs['llm'] = llm
+    if llm_settings is not None:
+        chat_kwargs['llm_settings'] = llm_settings
     return chat(
         prompt,
         json.dumps(patient, ensure_ascii=False),
-        session_id=session_id,
+        **chat_kwargs,
     )
 
 
 def exams(
-    selected_dx: List[str], language: str = 'en', session_id: str | None = None
+    selected_dx: list[str],
+    language: str = 'en',
+    session_id: str | None = None,
+    llm: StructuredLLM | None = None,
+    llm_settings: LLMSettings | None = None,
 ) -> LLMDiagnosis:
-    """Return summary + list of suggested examinations."""
+    """
+    title: Return summary + list of suggested examinations.
+    parameters:
+      selected_dx:
+        type: list[str]
+        description: Value for selected_dx.
+      language:
+        type: str
+        description: Value for language.
+      session_id:
+        type: str | None
+        description: Value for session_id.
+      llm:
+        type: StructuredLLM | None
+        description: Value for llm.
+      llm_settings:
+        type: LLMSettings | None
+        description: Value for llm_settings.
+    returns:
+      type: LLMDiagnosis
+      description: Return value.
+    """
     prompt = _EXAM_PROMPTS.get(language, _EXAM_PROMPTS['en'])
+    chat_kwargs: dict[str, Any] = {'session_id': session_id}
+    if llm is not None:
+        chat_kwargs['llm'] = llm
+    if llm_settings is not None:
+        chat_kwargs['llm_settings'] = llm_settings
     return chat(
         prompt,
         json.dumps(selected_dx, ensure_ascii=False),
-        session_id=session_id,
+        **chat_kwargs,
     )
 
 

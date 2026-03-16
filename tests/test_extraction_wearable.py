@@ -1,4 +1,6 @@
-"""Test the extraction of wearable data."""
+"""
+title: Test the extraction of wearable data.
+"""
 
 import io
 
@@ -35,7 +37,14 @@ def mock_excel_file(tmp_path):
 
 
 def test_only_supported_files_can_be_extracted(wearable_extractor, mock_excel_file):
-    """Test that only supported files can be extracted."""
+    """
+    title: Test that only supported files can be extracted.
+    parameters:
+      wearable_extractor:
+        description: Value for wearable_extractor.
+      mock_excel_file:
+        description: A temporary mock Excel file.
+    """
     assert wearable_extractor.is_supported(JSON_FILE)
     assert wearable_extractor.is_supported(CSV_FILE)
     assert wearable_extractor.is_supported(mock_excel_file)
@@ -44,7 +53,12 @@ def test_only_supported_files_can_be_extracted(wearable_extractor, mock_excel_fi
 
 
 def test_extract_json(wearable_extractor):
-    """Test that JSON file can be extracted."""
+    """
+    title: Test that JSON file can be extracted.
+    parameters:
+      wearable_extractor:
+        description: Value for wearable_extractor.
+    """
     assert wearable_extractor._is_json(JSON_FILE)
     wearable_data = wearable_extractor.extract_wearable_data(JSON_FILE)
     assert wearable_data
@@ -52,7 +66,12 @@ def test_extract_json(wearable_extractor):
 
 
 def test_extract_csv(wearable_extractor):
-    """Test that CSV file can be extracted."""
+    """
+    title: Test that CSV file can be extracted.
+    parameters:
+      wearable_extractor:
+        description: Value for wearable_extractor.
+    """
     assert wearable_extractor._is_csv(CSV_FILE)
     wearable_data = wearable_extractor.extract_wearable_data(CSV_FILE)
     assert wearable_data
@@ -60,19 +79,34 @@ def test_extract_csv(wearable_extractor):
 
 
 def test_extract_unsupported_file(wearable_extractor):
-    """Test that unsupported file cannot be extracted."""
+    """
+    title: Test that unsupported file cannot be extracted.
+    parameters:
+      wearable_extractor:
+        description: Value for wearable_extractor.
+    """
     with pytest.raises(WearableDataExtractorError):
         wearable_extractor.extract_wearable_data(UNSUPPORTED_FILE)
 
 
 def test_extract_malformed_file(wearable_extractor):
-    """Test that malformed/corrupted file cannot be extracted."""
+    """
+    title: Test that malformed/corrupted file cannot be extracted.
+    parameters:
+      wearable_extractor:
+        description: Value for wearable_extractor.
+    """
     with pytest.raises(WearableDataExtractorError):
         wearable_extractor.extract_wearable_data(CORRUPT_FILE)
 
 
 def test_support_inmemory_json_file(wearable_extractor):
-    """Test that in-memory file can be extracted."""
+    """
+    title: Test that in-memory file can be extracted.
+    parameters:
+      wearable_extractor:
+        description: Value for wearable_extractor.
+    """
     raw_json = b"""
     [
     {
@@ -107,7 +141,12 @@ def test_support_inmemory_json_file(wearable_extractor):
 
 
 def test_support_inmemory_csv(wearable_extractor):
-    """Test that in-memory CSV can be extracted."""
+    """
+    title: Test that in-memory CSV can be extracted.
+    parameters:
+      wearable_extractor:
+        description: Value for wearable_extractor.
+    """
     raw_csv = b"""
         name,age,heart_rate,timestamp
         John Doe,30,70,1
